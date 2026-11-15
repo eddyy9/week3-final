@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { fetchUsers } from './api/users'
-import { UserCard } from './components/UserCard'
+import { UserList } from './components/UserList'
 import { UserSearch } from './components/UserSearch'
 import { UserForm } from './components/UserForm'
 import type { NewUser, User } from './types/user'
+import { filterUsers } from './utils/filterUsers'
 import './App.css'
 
 type RequestStatus = 'loading' | 'success' | 'error'
@@ -46,10 +47,7 @@ function App() {
   }, [reloadKey])
 
   // Это производные данные: отдельные state и useEffect не нужны.
-  const normalizedQuery = query.trim().toLowerCase()
-  const visibleUsers = users.filter(user =>
-    user.name.toLowerCase().includes(normalizedQuery),
-  )
+  const visibleUsers = filterUsers(users, query)
 
   function handleDelete(id: User['id']) {
     setUsers(currentUsers => currentUsers.filter(user => user.id !== id))
@@ -119,13 +117,7 @@ function App() {
               </button>
             </section>
           ) : (
-            <ul className="user-list" aria-label="Пользователи">
-              {visibleUsers.map(user => (
-                <li key={user.id}>
-                  <UserCard user={user} onDelete={handleDelete} />
-                </li>
-              ))}
-            </ul>
+            <UserList users={visibleUsers} onDelete={handleDelete} />
           )}
 
           <UserForm onAdd={handleAdd} />
